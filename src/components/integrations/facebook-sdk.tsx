@@ -18,6 +18,8 @@ export function FacebookSdk() {
 
   const sdkUrl = `https://connect.facebook.net/${facebookSdkLocale}/sdk.js`;
   const initScript = `
+    window.veltrixCanUseFacebookLogin = window.location.protocol === "https:";
+
     window.veltrixFacebookStatusChangeCallback = function(response) {
       window.__veltrixFacebookLoginStatus = response;
       window.dispatchEvent(new CustomEvent(${JSON.stringify(
@@ -26,7 +28,7 @@ export function FacebookSdk() {
     };
 
     window.checkLoginState = function() {
-      if (!window.FB) { return; }
+      if (!window.FB || !window.veltrixCanUseFacebookLogin) { return; }
 
       window.FB.getLoginStatus(function(response) {
         window.veltrixFacebookStatusChangeCallback(response);
@@ -37,7 +39,7 @@ export function FacebookSdk() {
       window.FB.init({
         appId: ${JSON.stringify(facebookAppId)},
         cookie: true,
-        xfbml: true,
+        xfbml: window.veltrixCanUseFacebookLogin,
         version: ${JSON.stringify(facebookApiVersion)}
       });
 
@@ -46,10 +48,13 @@ export function FacebookSdk() {
         FACEBOOK_SDK_READY_EVENT
       )}, { detail: {
         appId: ${JSON.stringify(facebookAppId)},
-        apiVersion: ${JSON.stringify(facebookApiVersion)}
+        apiVersion: ${JSON.stringify(facebookApiVersion)},
+        canUseFacebookLogin: window.veltrixCanUseFacebookLogin
       }}));
 
-      window.checkLoginState();
+      if (window.veltrixCanUseFacebookLogin) {
+        window.checkLoginState();
+      }
     };
 
     (function(d, s, id) {

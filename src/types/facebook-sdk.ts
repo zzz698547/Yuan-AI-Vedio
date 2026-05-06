@@ -6,6 +6,7 @@ export type FacebookLoginStatus = "connected" | "not_authorized" | "unknown";
 export type FacebookLoginUiStatus =
   | FacebookLoginStatus
   | "checking"
+  | "https_required"
   | "not_configured";
 
 export type FacebookAuthResponse = {
@@ -57,6 +58,7 @@ export type FacebookProfileResponse = FacebookProfile & {
 export type FacebookSdkReadyDetail = {
   apiVersion: string;
   appId: string;
+  canUseFacebookLogin: boolean;
 };
 
 declare global {
@@ -90,6 +92,7 @@ declare global {
     __veltrixFacebookLoginStatus?: FacebookLoginStatusResponse;
     checkLoginState?: () => void;
     fbAsyncInit?: () => void;
+    veltrixCanUseFacebookLogin?: boolean;
     veltrixFacebookStatusChangeCallback?: (
       response: FacebookLoginStatusResponse
     ) => void;

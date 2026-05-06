@@ -12,6 +12,7 @@ import type {
 
 type FacebookLoginSummaryProps = {
   appId?: string;
+  canUseFacebookLogin: boolean;
   isChecking: boolean;
   loginResponse: FacebookLoginStatusResponse | null;
   onCheck: () => void;
@@ -21,6 +22,7 @@ type FacebookLoginSummaryProps = {
 
 export function FacebookLoginSummary({
   appId,
+  canUseFacebookLogin,
   isChecking,
   loginResponse,
   onCheck,
@@ -29,6 +31,7 @@ export function FacebookLoginSummary({
 }: FacebookLoginSummaryProps) {
   const copy = facebookLoginStatusCopy[isChecking ? "checking" : status];
   const isConnected = loginResponse?.status === "connected";
+  const isActionDisabled = !appId || !canUseFacebookLogin || isChecking;
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -63,7 +66,7 @@ export function FacebookLoginSummary({
         <Button
           type="button"
           variant="outline"
-          disabled={!appId || isChecking}
+          disabled={isActionDisabled}
           onClick={onCheck}
           className="h-10 rounded-xl"
         >
@@ -72,7 +75,7 @@ export function FacebookLoginSummary({
         </Button>
         <Button
           type="button"
-          disabled={!appId || isChecking}
+          disabled={isActionDisabled}
           onClick={onLogin}
           className="h-10 rounded-xl"
         >

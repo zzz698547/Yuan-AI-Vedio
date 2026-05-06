@@ -33,6 +33,13 @@ export const facebookLoginStatusCopy: Record<
     label: "Facebook 登入狀態未知",
     toneClass: "border-slate-200 bg-slate-50 text-muted-foreground",
   },
+  https_required: {
+    badge: "需要 HTTPS",
+    description:
+      "Meta 已禁止在 http 頁面呼叫 FB.login / FB.getLoginStatus，請改用 Vercel HTTPS 或本機 HTTPS tunnel 測試正式授權。",
+    label: "Facebook 正式授權需要 HTTPS",
+    toneClass: "border-orange-100 bg-orange-50 text-warning",
+  },
   not_configured: {
     badge: "未設定",
     description: "請先設定 NEXT_PUBLIC_FACEBOOK_APP_ID 才能啟用 JS SDK。",

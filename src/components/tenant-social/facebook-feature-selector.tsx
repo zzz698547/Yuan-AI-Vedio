@@ -32,16 +32,16 @@ export function FacebookFeatureSelector({
           return (
             <label
               key={feature.id}
-              className="flex cursor-pointer gap-3 rounded-2xl border border-border bg-white p-3 transition hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(15,23,42,0.07)]"
+              className="flex min-w-0 cursor-pointer items-start gap-3 rounded-2xl border border-border bg-white p-3 transition hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(15,23,42,0.07)]"
             >
               <input
                 type="checkbox"
                 checked={checked}
                 disabled={disabled}
                 onChange={() => onToggle(feature.id)}
-                className="mt-1 size-4 accent-[var(--primary)]"
+                className="mt-1 size-4 shrink-0 accent-[var(--primary)]"
               />
-              <span>
+              <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-foreground">
                   {feature.label}
                 </span>
@@ -50,7 +50,11 @@ export function FacebookFeatureSelector({
                 </span>
                 <span className="mt-2 flex flex-wrap gap-1.5">
                   {feature.scopes.map((scope) => (
-                    <Badge key={scope} variant="info" className="font-mono">
+                    <Badge
+                      key={scope}
+                      variant="info"
+                      className="h-auto max-w-full shrink break-all px-2 py-1 text-left font-mono leading-4 whitespace-normal"
+                    >
                       {scope}
                     </Badge>
                   ))}

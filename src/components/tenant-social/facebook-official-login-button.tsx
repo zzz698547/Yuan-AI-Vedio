@@ -1,10 +1,12 @@
 "use client";
 
 type FacebookOfficialLoginButtonProps = {
+  canUseFacebookLogin: boolean;
   requestedScopes: string;
 };
 
 export function FacebookOfficialLoginButton({
+  canUseFacebookLogin,
   requestedScopes,
 }: FacebookOfficialLoginButtonProps) {
   const loginButtonHtml = `<fb:login-button scope="${requestedScopes}" onlogin="checkLoginState();" size="large"></fb:login-button>`;
@@ -15,12 +17,18 @@ export function FacebookOfficialLoginButton({
       <p className="mt-1 text-xs leading-5 text-muted-foreground">
         下方按鈕使用 Meta XFBML login button，onlogin 會呼叫 checkLoginState() 並重新取得登入狀態。
       </p>
-      <div
-        id="veltrix-facebook-login-plugin"
-        key={requestedScopes}
-        className="mt-3 min-h-10"
-        dangerouslySetInnerHTML={{ __html: loginButtonHtml }}
-      />
+      {canUseFacebookLogin ? (
+        <div
+          id="veltrix-facebook-login-plugin"
+          key={requestedScopes}
+          className="mt-3 min-h-10"
+          dangerouslySetInnerHTML={{ __html: loginButtonHtml }}
+        />
+      ) : (
+        <div className="mt-3 rounded-xl border border-orange-100 bg-orange-50 px-4 py-3 text-xs font-semibold leading-5 text-warning">
+          本機 http 預覽已暫停渲染官方按鈕，避免 Facebook SDK 報錯。請使用 Vercel HTTPS 網址測試正式授權。
+        </div>
+      )}
     </div>
   );
 }

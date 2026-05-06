@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { FacebookAccountPreview } from "@/components/tenant-social/facebook-account-preview";
 import { FacebookFeatureSelector } from "@/components/tenant-social/facebook-feature-selector";
@@ -8,6 +8,7 @@ import { FacebookLoginSummary } from "@/components/tenant-social/facebook-login-
 import { FacebookOfficialLoginButton } from "@/components/tenant-social/facebook-official-login-button";
 import { facebookLoginFeatures } from "@/data/facebook-login-features";
 import {
+  canUseFacebookLoginInCurrentOrigin,
   getRequestedScopes,
   loadFacebookProfile,
   parseFacebookLoginButton,
@@ -29,6 +30,11 @@ export function FacebookLoginStatusCard({
   platform,
 }: FacebookLoginStatusCardProps) {
   const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+  const canUseFacebookLogin = useSyncExternalStore(
+    subscribeToLocationChanges,
+    canUseFacebookLoginInCurrentOrigin,
+    getServerFacebookLoginSupport
+  );
   const [status, setStatus] = useState<FacebookLoginUiStatus>(
     appId ? "checking" : "not_configured"
   );
@@ -46,9 +52,14 @@ export function FacebookLoginStatusCard({
   );
   const requestedScopes = getRequestedScopes(selectedFeatures, platform);
   const selectedFeatureLabels = selectedFeatures.map((feature) => feature.label);
+  const displayStatus: FacebookLoginUiStatus = appId
+    ? canUseFacebookLogin
+      ? status
+      : "https_required"
+    : "not_configured";
 
   useEffect(() => {
-    if (!appId) {
+    if (!appId || !canUseFacebookLogin) {
       return;
     }
 
@@ -95,13 +106,21 @@ export function FacebookLoginStatusCard({
       window.removeEventListener(FACEBOOK_LOGIN_STATUS_EVENT, handleStatus);
       window.removeEventListener(FACEBOOK_SDK_READY_EVENT, handleSdkReady);
     };
-  }, [appId]);
+  }, [appId, canUseFacebookLogin]);
 
   useEffect(() => {
+    if (!canUseFacebookLogin) {
+      return;
+    }
+
     parseFacebookLoginButton();
-  }, [requestedScopes]);
+  }, [canUseFacebookLogin, requestedScopes]);
 
   function checkLoginStatus() {
+    if (!canUseFacebookLoginInCurrentOrigin()) {
+      return;
+    }
+
     if (!window.FB) {
       setStatus(appId ? "checking" : "not_configured");
       return;
@@ -122,6 +141,10 @@ export function FacebookLoginStatusCard({
   }
 
   function loginWithFacebook() {
+    if (!canUseFacebookLoginInCurrentOrigin()) {
+      return;
+    }
+
     if (!window.FB) {
       return;
     }
@@ -158,9 +181,10 @@ export function FacebookLoginStatusCard({
     <div className="mt-5 rounded-2xl border border-border bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.06)]">
       <FacebookLoginSummary
         appId={appId}
+        canUseFacebookLogin={canUseFacebookLogin}
         isChecking={isChecking}
         loginResponse={loginResponse}
-        status={status}
+        status={displayStatus}
         onCheck={checkLoginStatus}
         onLogin={loginWithFacebook}
       />
@@ -172,7 +196,10 @@ export function FacebookLoginStatusCard({
         onToggle={toggleFeature}
       />
 
-      <FacebookOfficialLoginButton requestedScopes={requestedScopes} />
+      <FacebookOfficialLoginButton
+        canUseFacebookLogin={canUseFacebookLogin}
+        requestedScopes={requestedScopes}
+      />
 
       {profileError ? (
         <p className="mt-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-danger">
@@ -186,4 +213,18 @@ export function FacebookLoginStatusCard({
       />
     </div>
   );
+}
+
+function getServerFacebookLoginSupport() {
+  return true;
+}
+
+function subscribeToLocationChanges(onStoreChange: () => void) {
+  window.addEventListener("hashchange", onStoreChange);
+  window.addEventListener("popstate", onStoreChange);
+
+  return () => {
+    window.removeEventListener("hashchange", onStoreChange);
+    window.removeEventListener("popstate", onStoreChange);
+  };
 }

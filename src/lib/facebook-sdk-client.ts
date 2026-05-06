@@ -34,7 +34,7 @@ export function loadFacebookProfile(
   setProfile: (profile: FacebookProfile | null) => void,
   setProfileError: (message: string) => void
 ) {
-  if (!window.FB) {
+  if (!canUseFacebookLoginInCurrentOrigin() || !window.FB) {
     return;
   }
 
@@ -54,7 +54,19 @@ export function loadFacebookProfile(
   );
 }
 
+export function canUseFacebookLoginInCurrentOrigin() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return window.location.protocol === "https:";
+}
+
 export function parseFacebookLoginButton() {
+  if (!canUseFacebookLoginInCurrentOrigin() || !window.FB) {
+    return;
+  }
+
   const container = document.getElementById("veltrix-facebook-login-plugin");
-  window.FB?.XFBML?.parse(container);
+  window.FB.XFBML?.parse(container);
 }
