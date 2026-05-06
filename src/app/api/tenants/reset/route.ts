@@ -6,6 +6,6 @@ export async function POST() {
   const store = initializeAppStore();
   return NextResponse.json({
     data: store.tenants,
-    message: "已復原預設租戶資料。",
+    message: "已初始化空租戶資料。",
   });
 }

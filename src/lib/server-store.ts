@@ -1,6 +1,5 @@
 import * as adminData from "@/data/mock-admin";
 import * as tenantData from "@/data/mock-tenant";
-import { mockTenants } from "@/data/mock-tenants";
 import {
   createInitialIntegrationState,
   type IntegrationState,
@@ -29,13 +28,9 @@ type StoreGlobal = typeof globalThis & {
   __aiVideoStore?: AppStore;
 };
 
-function cloneTenants(tenants: TenantRecord[]) {
-  return tenants.map((tenant) => ({ ...tenant }));
-}
-
 function createInitialStore(): AppStore {
   return {
-    tenants: cloneTenants(mockTenants),
+    tenants: [],
     tenantAutomation: {},
     tenantNotifications: {},
     integrations: createInitialIntegrationState(),

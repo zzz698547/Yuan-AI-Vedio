@@ -167,10 +167,12 @@ export function useTenantManagement() {
     resetTenantsApi()
       .then((result) => {
         setTenants(result.data);
-        setNotice("已透過 API 復原預設租戶資料。");
+        setSelectedTenant(null);
+        setEditingTenant(null);
+        setNotice("已透過 API 初始化租戶資料，目前租戶列表為空。");
       })
       .catch((error: unknown) => {
-        setNotice(getErrorMessage(error, "復原資料失敗。"));
+        setNotice(getErrorMessage(error, "初始化資料失敗。"));
       });
   }
 

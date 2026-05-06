@@ -119,7 +119,7 @@ export function TenantManagementToolbar({
         />
         <Button variant="outline" className="h-11 rounded-[14px]" onClick={onRestore}>
           <RotateCcw data-icon="inline-start" />
-          復原資料
+          初始化資料
         </Button>
         <Button className="h-11 rounded-[14px] px-4" onClick={onAddTenant}>
           <Plus data-icon="inline-start" />

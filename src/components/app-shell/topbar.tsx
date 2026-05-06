@@ -172,10 +172,12 @@ export function Topbar({ mode = "admin", className }: TopbarProps) {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem onClick={handleInitializeData}>
-              <DatabaseZap />
-              初始化全站資料
-            </DropdownMenuItem>
+            {mode === "admin" ? (
+              <DropdownMenuItem onClick={handleInitializeData}>
+                <DatabaseZap />
+                初始化全站資料
+              </DropdownMenuItem>
+            ) : null}
             <DropdownMenuItem onClick={handleClearCache}>
               <RefreshCw />
               清除全站快取

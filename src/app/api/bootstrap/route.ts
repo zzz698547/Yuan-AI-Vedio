@@ -11,6 +11,6 @@ export async function POST() {
       tenants: store.tenants,
       dashboards: getDashboardSeedData(),
     },
-    message: "全站 mock data 已初始化。",
+    message: "全站資料已初始化為空狀態。",
   });
 }
