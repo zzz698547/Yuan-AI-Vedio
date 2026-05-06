@@ -5,7 +5,7 @@ import {
   unbindAiProvider,
 } from "@/lib/ai-model-bindings";
 import { isAiProviderId } from "@/lib/integration-service";
-import { getIntegrationState } from "@/lib/server-store";
+import { getIntegrationState, loadAppStore, saveAppStore } from "@/lib/server-store";
 
 type BindProviderRequest = {
   providerId?: unknown;
@@ -14,6 +14,7 @@ type BindProviderRequest = {
 
 export async function POST(request: NextRequest) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as BindProviderRequest;
 
     if (!isAiProviderId(body.providerId)) {
@@ -25,6 +26,7 @@ export async function POST(request: NextRequest) {
       apiKey: body.apiKey ?? "",
     });
 
+    await saveAppStore();
     return NextResponse.json({ data, message: "API Key 已儲存。" }, { status: 201 });
   } catch (error) {
     return NextResponse.json(
@@ -36,6 +38,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as BindProviderRequest;
 
     if (!isAiProviderId(body.providerId)) {
@@ -44,6 +47,7 @@ export async function DELETE(request: NextRequest) {
 
     const data = unbindAiProvider(getIntegrationState(), body.providerId);
 
+    await saveAppStore();
     return NextResponse.json({ data, message: "AI Provider 已解除綁定。" });
   } catch (error) {
     return NextResponse.json(

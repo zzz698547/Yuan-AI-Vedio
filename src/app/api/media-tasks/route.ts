@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { createMediaTask } from "@/lib/integration-service";
-import { getIntegrationState, getTenantNotificationState } from "@/lib/server-store";
+import {
+  getIntegrationState,
+  getTenantNotificationState,
+  loadAppStore,
+  saveAppStore,
+} from "@/lib/server-store";
 import { sendTenantNotificationEvent } from "@/lib/tenant-notification-service";
 import type { MediaTaskType } from "@/types/integrations";
 
@@ -23,11 +28,13 @@ function isMediaTaskType(value: unknown): value is MediaTaskType {
 }
 
 export async function GET() {
+  await loadAppStore();
   return NextResponse.json({ data: getIntegrationState().mediaTasks });
 }
 
 export async function POST(request: NextRequest) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as MediaTaskRequest;
 
     if (!isMediaTaskType(body.type)) {
@@ -46,6 +53,7 @@ export async function POST(request: NextRequest) {
     const notification =
       body.type === "video-generation" ? await tryNotifyVideoGenerated(task) : null;
 
+    await saveAppStore();
     return NextResponse.json(
       { data: task, notification, message: "媒體任務已執行。" },
       { status: 201 }

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getTenantNotificationState } from "@/lib/server-store";
+import {
+  getTenantNotificationState,
+  loadAppStore,
+  saveAppStore,
+} from "@/lib/server-store";
 import { sendTenantNotificationEvent } from "@/lib/tenant-notification-service";
 import type { NotificationEventId } from "@/types/notification";
 
@@ -13,6 +17,7 @@ type NotificationEventRequest = {
 
 export async function POST(request: NextRequest) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as NotificationEventRequest;
 
     if (!body.eventId || !body.title || !body.detail) {
@@ -28,6 +33,7 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    await saveAppStore();
     return NextResponse.json({
       data: result,
       message: result.message,

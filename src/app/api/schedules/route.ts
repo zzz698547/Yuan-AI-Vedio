@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isSocialPlatformId } from "@/lib/integration-service";
-import { getIntegrationState } from "@/lib/server-store";
+import { getIntegrationState, loadAppStore, saveAppStore } from "@/lib/server-store";
 import {
   createPublishingScheduleRecord,
   getPublishingSchedulePayload,
@@ -18,6 +18,7 @@ type ScheduleRequest = {
 };
 
 export async function GET() {
+  await loadAppStore();
   return NextResponse.json({
     data: getPublishingSchedulePayload(getIntegrationState()),
   });
@@ -25,6 +26,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as ScheduleRequest;
 
     if (!isSocialPlatformId(body.platform)) {
@@ -42,6 +44,7 @@ export async function POST(request: NextRequest) {
       publishAt: body.publishAt ?? "",
     });
 
+    await saveAppStore();
     return NextResponse.json({ data: schedule, message: "排程已建立。" }, { status: 201 });
   } catch (error) {
     return NextResponse.json(

@@ -8,6 +8,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { createAdminDashboardPayload } from "@/lib/admin-dashboard-data";
+import { getAppStore, loadAppStore } from "@/lib/server-store";
+import { AdminInitializeButton } from "@/components/dashboard/admin-initialize-button";
 import { ActivityLogTable } from "@/components/dashboard/activity-log-table";
 import { AnnouncementCard } from "@/components/dashboard/announcement-card";
 import { ExpiringTenantsCard } from "@/components/dashboard/expiring-tenants-card";
@@ -18,7 +21,8 @@ import { SocialBindStatus } from "@/components/dashboard/social-bind-status";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TenantStatusChart } from "@/components/dashboard/tenant-status-chart";
 import { UsageLineChart } from "@/components/dashboard/usage-line-chart";
-import { statsCards } from "@/data/mock-admin";
+
+export const dynamic = "force-dynamic";
 
 const statIconMap: Record<string, LucideIcon> = {
   "building-2": Building2,
@@ -28,7 +32,10 @@ const statIconMap: Record<string, LucideIcon> = {
   activity: Activity,
 };
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  await loadAppStore();
+  const dashboardData = createAdminDashboardPayload(getAppStore());
+
   return (
     <div className="flex flex-col gap-5 lg:gap-6">
       <section className="dashboard-hero p-5 md:p-7">
@@ -46,6 +53,7 @@ export default function AdminDashboardPage() {
                 這是您系統的總覽概況，快速掌握租戶狀態、影片生成量與平台使用趨勢。
               </p>
             </div>
+            <AdminInitializeButton />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:w-[380px]">
@@ -82,7 +90,7 @@ export default function AdminDashboardPage() {
       </section>
 
       <section className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
-        {statsCards.map((card) => {
+        {dashboardData.statsCards.map((card) => {
           const Icon = statIconMap[card.icon] ?? Activity;
 
           return (
@@ -101,13 +109,13 @@ export default function AdminDashboardPage() {
 
       <section className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12 [&>section]:h-full">
         <div className="lg:col-span-7 2xl:col-span-5">
-          <UsageLineChart />
+          <UsageLineChart data={dashboardData.usageChartData} />
         </div>
         <div className="lg:col-span-5 2xl:col-span-4">
-          <TenantStatusChart />
+          <TenantStatusChart data={dashboardData.tenantStatus} />
         </div>
         <div className="lg:col-span-12 2xl:col-span-3">
-          <ExpiringTenantsCard />
+          <ExpiringTenantsCard tenants={dashboardData.expiringTenants} />
         </div>
       </section>
 
@@ -116,19 +124,19 @@ export default function AdminDashboardPage() {
           <QuickActions />
         </div>
         <div className="lg:col-span-6 2xl:col-span-3">
-          <RecentVideos />
+          <RecentVideos videos={dashboardData.recentVideos} />
         </div>
         <div className="lg:col-span-6 2xl:col-span-3">
-          <SocialBindStatus />
+          <SocialBindStatus accounts={dashboardData.socialAccounts} />
         </div>
         <div className="lg:col-span-6 2xl:col-span-3">
-          <ScheduleCalendarCard />
+          <ScheduleCalendarCard days={dashboardData.scheduleDays} />
         </div>
       </section>
 
       <section className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12 [&>section]:h-full">
         <div className="lg:col-span-8">
-          <ActivityLogTable />
+          <ActivityLogTable logs={dashboardData.activityLogs} />
         </div>
         <div className="lg:col-span-4">
           <AnnouncementCard />

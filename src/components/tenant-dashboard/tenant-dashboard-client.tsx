@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Lightbulb } from "lucide-react";
 
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -7,9 +8,32 @@ import { tenantDashboardIconMap } from "@/components/tenant-dashboard/icon-map";
 import { TenantDashboardCharts } from "@/components/tenant-dashboard/tenant-dashboard-charts";
 import { TenantDashboardLists } from "@/components/tenant-dashboard/tenant-dashboard-lists";
 import { initialTenantDashboardData } from "@/data/tenant-dashboard";
+import { getMockSession } from "@/lib/mock-auth";
+import { getTenantDashboardApi } from "@/lib/tenant-dashboard-api";
 
 export function TenantDashboardClient() {
-  const dashboardData = initialTenantDashboardData;
+  const [dashboardData, setDashboardData] = useState(initialTenantDashboardData);
+
+  useEffect(() => {
+    let isMounted = true;
+    const session = getMockSession();
+
+    getTenantDashboardApi(session?.tenantId)
+      .then((data) => {
+        if (isMounted) {
+          setDashboardData(data);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setDashboardData(initialTenantDashboardData);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="flex flex-col gap-5 lg:gap-6">

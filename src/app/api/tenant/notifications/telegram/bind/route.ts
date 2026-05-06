@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getTenantNotificationState } from "@/lib/server-store";
+import {
+  getTenantNotificationState,
+  loadAppStore,
+  saveAppStore,
+} from "@/lib/server-store";
 import { bindTelegram } from "@/lib/tenant-notification-service";
 
 type TelegramBindRequest = {
@@ -11,12 +15,14 @@ type TelegramBindRequest = {
 
 export async function POST(request: NextRequest) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as TelegramBindRequest;
     const data = bindTelegram(getTenantNotificationState(body.tenantId || "tenant-demo"), {
       botToken: body.botToken ?? "",
       chatId: body.chatId ?? "",
     });
 
+    await saveAppStore();
     return NextResponse.json({
       data,
       message: "Telegram 已手動綁定。",

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getTenantNotificationState } from "@/lib/server-store";
+import {
+  getTenantNotificationState,
+  loadAppStore,
+  saveAppStore,
+} from "@/lib/server-store";
 import { sendTelegramTest } from "@/lib/tenant-notification-service";
 
 type TelegramTestRequest = {
@@ -9,11 +13,13 @@ type TelegramTestRequest = {
 
 export async function POST(request: NextRequest) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as TelegramTestRequest;
     const data = await sendTelegramTest(
       getTenantNotificationState(body.tenantId || "tenant-demo")
     );
 
+    await saveAppStore();
     return NextResponse.json({
       data,
       message: "Telegram 測試通知已送出。",

@@ -9,8 +9,9 @@ import {
 } from "recharts";
 
 import { tenantStatus } from "@/data/mock-admin";
+import type { TenantStatusDatum } from "@/types/admin-dashboard";
 
-const statusColors: Record<(typeof tenantStatus)[number]["color"], string> = {
+const statusColors: Record<TenantStatusDatum["color"], string> = {
   green: "#22C55E",
   orange: "#F59E0B",
   purple: "#8B5CF6",
@@ -44,8 +45,12 @@ function StatusTooltip({ active, payload }: ChartTooltipProps) {
   );
 }
 
-export function TenantStatusChart() {
-  const totalTenants = tenantStatus.reduce((total, item) => total + item.value, 0);
+type TenantStatusChartProps = {
+  data?: readonly TenantStatusDatum[];
+};
+
+export function TenantStatusChart({ data = tenantStatus }: TenantStatusChartProps) {
+  const totalTenants = data.reduce((total, item) => total + item.value, 0);
 
   return (
     <section className="dashboard-card overflow-hidden">
@@ -62,7 +67,7 @@ export function TenantStatusChart() {
             <PieChart>
               <Tooltip content={<StatusTooltip />} />
               <Pie
-                data={tenantStatus}
+                data={data}
                 dataKey="value"
                 nameKey="name"
                 innerRadius="62%"
@@ -71,7 +76,7 @@ export function TenantStatusChart() {
                 stroke="#FFFFFF"
                 strokeWidth={4}
               >
-                {tenantStatus.map((item) => (
+                {data.map((item) => (
                   <Cell key={item.name} fill={statusColors[item.color]} />
                 ))}
               </Pie>
@@ -90,7 +95,7 @@ export function TenantStatusChart() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
-          {tenantStatus.map((item) => (
+          {data.map((item) => (
             <div key={item.name} className="flex items-center gap-3">
               <span
                 className="size-3 rounded-full"

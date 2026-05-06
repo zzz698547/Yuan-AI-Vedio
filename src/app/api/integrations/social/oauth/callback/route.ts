@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getIntegrationState } from "@/lib/server-store";
+import { getIntegrationState, loadAppStore, saveAppStore } from "@/lib/server-store";
 import {
   decodeOAuthCookie,
   exchangeSocialOAuthCode,
@@ -8,6 +8,7 @@ import {
 } from "@/lib/social-oauth";
 
 export async function GET(request: NextRequest) {
+  await loadAppStore();
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
@@ -68,6 +69,7 @@ export async function GET(request: NextRequest) {
           }
         : item
     );
+    await saveAppStore();
 
     const response = redirectToSocialAccounts(
       request,

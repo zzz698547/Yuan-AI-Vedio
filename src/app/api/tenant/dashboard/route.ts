@@ -1,7 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import { getDashboardSeedData } from "@/lib/server-store";
+import { createTenantDashboardPayload } from "@/lib/tenant-dashboard-data";
+import { getAppStore, loadAppStore } from "@/lib/server-store";
 
-export async function GET() {
-  return NextResponse.json({ data: getDashboardSeedData().tenant });
+export async function GET(request: NextRequest) {
+  await loadAppStore();
+  const tenantId =
+    request.nextUrl.searchParams.get("tenantId")?.trim() || "default-tenant";
+
+  return NextResponse.json({
+    data: createTenantDashboardPayload(getAppStore(), tenantId),
+  });
 }

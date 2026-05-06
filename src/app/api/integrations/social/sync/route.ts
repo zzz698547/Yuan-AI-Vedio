@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isSocialPlatformId } from "@/lib/integration-service";
-import { getIntegrationState } from "@/lib/server-store";
+import { getIntegrationState, loadAppStore, saveAppStore } from "@/lib/server-store";
 
 type SyncRequest = {
   platformId?: unknown;
 };
 
 export async function POST(request: NextRequest) {
+  await loadAppStore();
   const body = (await request.json()) as SyncRequest;
 
   if (!isSocialPlatformId(body.platformId)) {
@@ -32,6 +33,7 @@ export async function POST(request: NextRequest) {
     integrations.socialPlatforms = integrations.socialPlatforms.map((item) =>
       item.id === nextPlatform.id ? nextPlatform : item
     );
+    await saveAppStore();
 
     return NextResponse.json(
       {
@@ -53,6 +55,7 @@ export async function POST(request: NextRequest) {
   integrations.socialPlatforms = integrations.socialPlatforms.map((item) =>
     item.id === syncedPlatform.id ? syncedPlatform : item
   );
+  await saveAppStore();
 
   return NextResponse.json({
     data: {

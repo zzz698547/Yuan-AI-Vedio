@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { expiringTenants } from "@/data/mock-admin";
 import { cn } from "@/lib/utils";
+import type { ExpiringTenantItem } from "@/types/admin-dashboard";
 
 function getStatusClass(status: string) {
   return status === "正常"
@@ -11,7 +12,13 @@ function getStatusClass(status: string) {
     : "bg-amber-50 text-warning ring-amber-100";
 }
 
-export function ExpiringTenantsCard() {
+type ExpiringTenantsCardProps = {
+  tenants?: readonly ExpiringTenantItem[];
+};
+
+export function ExpiringTenantsCard({
+  tenants = expiringTenants,
+}: ExpiringTenantsCardProps) {
   return (
     <section className="dashboard-card">
       <div className="mb-5 flex items-center justify-between gap-4">
@@ -27,7 +34,15 @@ export function ExpiringTenantsCard() {
       </div>
 
       <div className="flex flex-col gap-3">
-        {expiringTenants.map((tenant) => {
+        {tenants.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-slate-50 p-6 text-center">
+            <p className="font-semibold text-foreground">目前沒有即將到期租戶</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              初始化後會保持空狀態，直到新增租戶資料。
+            </p>
+          </div>
+        ) : null}
+        {tenants.map((tenant) => {
           const displayStatus =
             tenant.status === "即將到期" ? "即將到期" : "正常";
 

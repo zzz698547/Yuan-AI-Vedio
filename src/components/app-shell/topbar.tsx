@@ -48,6 +48,14 @@ export function Topbar({ mode = "admin", className }: TopbarProps) {
   }
 
   async function handleInitializeData() {
+    if (
+      !window.confirm(
+        "確定要清空並初始化全站資料嗎？此操作會刪除租戶、社群綁定、排程與 AI 任務。"
+      )
+    ) {
+      return;
+    }
+
     await fetch("/api/bootstrap", {
       method: "POST",
     });
@@ -175,7 +183,7 @@ export function Topbar({ mode = "admin", className }: TopbarProps) {
             {mode === "admin" ? (
               <DropdownMenuItem onClick={handleInitializeData}>
                 <DatabaseZap />
-                初始化全站資料
+                初始化並清空全站資料
               </DropdownMenuItem>
             ) : null}
             <DropdownMenuItem onClick={handleClearCache}>

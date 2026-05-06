@@ -4,6 +4,7 @@ import { Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { recentVideos } from "@/data/mock-admin";
 import { cn } from "@/lib/utils";
+import type { RecentVideoItem } from "@/types/admin-dashboard";
 
 const statusStyles: Record<string, string> = {
   已完成: "bg-emerald-50 text-success ring-emerald-100",
@@ -15,7 +16,11 @@ const statusStyles: Record<string, string> = {
   草稿: "bg-slate-100 text-muted-foreground ring-slate-200",
 };
 
-export function RecentVideos() {
+type RecentVideosProps = {
+  videos?: readonly RecentVideoItem[];
+};
+
+export function RecentVideos({ videos = recentVideos }: RecentVideosProps) {
   return (
     <section className="dashboard-card">
       <div className="mb-5 flex items-center justify-between gap-4">
@@ -31,7 +36,15 @@ export function RecentVideos() {
       </div>
 
       <div className="flex flex-col gap-3">
-        {recentVideos.map((video) => (
+        {videos.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-slate-50 p-6 text-center">
+            <p className="font-semibold text-foreground">尚無生成影片</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              建立 AI 任務後，最近影片會顯示在這裡。
+            </p>
+          </div>
+        ) : null}
+        {videos.map((video) => (
           <div
             key={video.title}
             className="flex items-center gap-3 rounded-2xl border border-border bg-white p-3"

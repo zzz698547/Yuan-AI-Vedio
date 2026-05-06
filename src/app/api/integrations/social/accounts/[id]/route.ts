@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getIntegrationState } from "@/lib/server-store";
+import { getIntegrationState, loadAppStore, saveAppStore } from "@/lib/server-store";
 import { deleteSocialAccountBinding } from "@/lib/social-bindings";
 
 export async function DELETE(
@@ -8,9 +8,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await loadAppStore();
     const { id } = await params;
     const data = deleteSocialAccountBinding(getIntegrationState(), id);
 
+    await saveAppStore();
     return NextResponse.json({
       data,
       message: "社群帳號已刪除。",

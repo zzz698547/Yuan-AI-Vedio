@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { getDashboardSeedData } from "@/lib/server-store";
+import { createAdminDashboardPayload } from "@/lib/admin-dashboard-data";
+import { getAppStore, loadAppStore } from "@/lib/server-store";
 
 export async function GET() {
-  return NextResponse.json({ data: getDashboardSeedData().admin });
+  await loadAppStore();
+  return NextResponse.json({
+    data: createAdminDashboardPayload(getAppStore()),
+  });
 }

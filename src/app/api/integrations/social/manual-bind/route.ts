@@ -4,7 +4,7 @@ import {
   createManualSocialBinding,
   isSocialPlatformId,
 } from "@/lib/integration-service";
-import { getIntegrationState } from "@/lib/server-store";
+import { getIntegrationState, loadAppStore, saveAppStore } from "@/lib/server-store";
 
 type ManualBindRequest = {
   platform?: unknown;
@@ -15,6 +15,7 @@ type ManualBindRequest = {
 
 export async function POST(request: NextRequest) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as ManualBindRequest;
 
     if (!isSocialPlatformId(body.platform)) {
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
         : platform
     );
 
+    await saveAppStore();
     return NextResponse.json(
       {
         data: {

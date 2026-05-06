@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import {
   getTenantAutomationState,
+  loadAppStore,
+  saveAppStore,
   setTenantAutomationState,
 } from "@/lib/server-store";
 import { applyCandidateAction } from "@/lib/tenant-automation-service";
@@ -28,6 +30,7 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    await loadAppStore();
     const { id } = await context.params;
     const body = (await request.json()) as CandidateActionRequest;
 
@@ -40,6 +43,7 @@ export async function PATCH(
     const updatedState = applyCandidateAction(currentState, id, body.action);
     const nextState = setTenantAutomationState(tenantId, updatedState);
 
+    await saveAppStore();
     return NextResponse.json({
       data: nextState,
       message: "候選影片狀態已更新。",

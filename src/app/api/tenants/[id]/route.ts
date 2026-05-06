@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAppStore } from "@/lib/server-store";
+import { getAppStore, loadAppStore, saveAppStore } from "@/lib/server-store";
 import type { TenantRecord, TenantStatus } from "@/types/tenant-management";
 
 type UpdateTenantRequest = Partial<
@@ -18,6 +18,7 @@ type RouteContext = {
 };
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
+  await loadAppStore();
   const { id } = await context.params;
   const store = getAppStore();
   const body = (await request.json()) as UpdateTenantRequest;
@@ -39,10 +40,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     item.id === id ? nextTenant : item
   );
 
+  await saveAppStore();
   return NextResponse.json({ data: nextTenant, message: "租戶已更新。" });
 }
 
 export async function DELETE(_request: NextRequest, context: RouteContext) {
+  await loadAppStore();
   const { id } = await context.params;
   const store = getAppStore();
   const tenant = store.tenants.find((item) => item.id === id);
@@ -52,5 +55,6 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
   }
 
   store.tenants = store.tenants.filter((item) => item.id !== id);
+  await saveAppStore();
   return NextResponse.json({ data: tenant, message: "租戶已刪除。" });
 }

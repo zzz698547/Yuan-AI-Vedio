@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isSocialPlatformId } from "@/lib/integration-service";
-import { getIntegrationState } from "@/lib/server-store";
+import { getIntegrationState, loadAppStore, saveAppStore } from "@/lib/server-store";
 import {
   createSocialOAuthStart,
   encodeOAuthCookie,
@@ -15,6 +15,7 @@ type OAuthStartRequest = {
 };
 
 export async function POST(request: NextRequest) {
+  await loadAppStore();
   const body = (await request.json()) as OAuthStartRequest;
 
   if (!isSocialPlatformId(body.platformId)) {
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
   integrations.socialPlatforms = integrations.socialPlatforms.map((item) =>
     item.id === result.platform.id ? result.platform : item
   );
+  await saveAppStore();
 
   const responseBody = {
     data: {

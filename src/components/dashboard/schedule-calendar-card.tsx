@@ -1,5 +1,6 @@
 import { scheduleDays } from "@/data/mock-admin";
 import { cn } from "@/lib/utils";
+import type { ScheduleDaySummary } from "@/types/admin-dashboard";
 
 const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
 const calendarCells = [
@@ -19,12 +20,18 @@ const legend = [
   { label: "草稿", className: "bg-warning" },
 ];
 
-function getDayType(day: number) {
+function getDayType(day: number, days: readonly ScheduleDaySummary[]) {
   const date = `2026-05-${String(day).padStart(2, "0")}`;
-  return scheduleDays.find((item) => item.date === date)?.type;
+  return days.find((item) => item.date === date)?.type;
 }
 
-export function ScheduleCalendarCard() {
+type ScheduleCalendarCardProps = {
+  days?: readonly ScheduleDaySummary[];
+};
+
+export function ScheduleCalendarCard({
+  days = scheduleDays,
+}: ScheduleCalendarCardProps) {
   return (
     <section className="dashboard-card">
       <h2 className="mb-5 text-lg font-bold tracking-tight text-foreground">
@@ -46,7 +53,7 @@ export function ScheduleCalendarCard() {
           </div>
         ))}
         {calendarCells.map((day, index) => {
-          const type = day ? getDayType(day) : undefined;
+          const type = day ? getDayType(day, days) : undefined;
 
           return (
             <div

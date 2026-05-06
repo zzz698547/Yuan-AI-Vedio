@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { testAiProvider } from "@/lib/ai-model-bindings";
 import { isAiProviderId } from "@/lib/integration-service";
-import { getIntegrationState } from "@/lib/server-store";
+import { getIntegrationState, loadAppStore, saveAppStore } from "@/lib/server-store";
 
 type TestProviderRequest = {
   providerId?: unknown;
@@ -10,6 +10,7 @@ type TestProviderRequest = {
 
 export async function POST(request: NextRequest) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as TestProviderRequest;
 
     if (!isAiProviderId(body.providerId)) {
@@ -19,6 +20,7 @@ export async function POST(request: NextRequest) {
     const integrations = getIntegrationState();
     const result = await testAiProvider(integrations, body.providerId);
 
+    await saveAppStore();
     return NextResponse.json({
       data: result,
       message: result.provider?.lastMessage,

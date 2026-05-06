@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import {
   getTenantAutomationState,
+  loadAppStore,
+  saveAppStore,
   setTenantAutomationState,
 } from "@/lib/server-store";
 import { validateAutomationSettings } from "@/lib/tenant-automation-service";
@@ -16,12 +18,14 @@ function getTenantId(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  await loadAppStore();
   const tenantId = getTenantId(request);
   return NextResponse.json({ data: getTenantAutomationState(tenantId) });
 }
 
 export async function PATCH(request: NextRequest) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as SettingsRequest;
     const tenantId = body.tenantId?.trim() || getTenantId(request);
     const currentState = getTenantAutomationState(tenantId);
@@ -31,6 +35,7 @@ export async function PATCH(request: NextRequest) {
       settings,
     });
 
+    await saveAppStore();
     return NextResponse.json({
       data: nextState,
       message: "自動產出設定已保存。",

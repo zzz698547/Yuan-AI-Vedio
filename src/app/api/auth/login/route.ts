@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { mockLoginAccounts } from "@/data/mock-auth";
-import { getAppStore } from "@/lib/server-store";
+import { getAppStore, loadAppStore } from "@/lib/server-store";
 import type { AuthRole, AuthenticatedAccount, MockLoginAccount } from "@/types/auth";
 
 type LoginRequest = {
@@ -25,6 +25,7 @@ function toAuthenticatedAccount(account: MockLoginAccount): AuthenticatedAccount
 }
 
 export async function POST(request: NextRequest) {
+  await loadAppStore();
   const body = (await request.json()) as LoginRequest;
 
   if (!isAuthRole(body.role) || !body.username?.trim() || !body.password) {

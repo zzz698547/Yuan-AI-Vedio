@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { updateModelFeature } from "@/lib/ai-model-bindings";
-import { getIntegrationState } from "@/lib/server-store";
+import { getIntegrationState, loadAppStore, saveAppStore } from "@/lib/server-store";
 import type { ModelFeatureBinding } from "@/types/integrations";
 
 type FeatureRequest = Partial<ModelFeatureBinding>;
@@ -14,6 +14,7 @@ const featureStatuses: ModelFeatureBinding["status"][] = [
 
 export async function PATCH(request: NextRequest) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as FeatureRequest;
 
     if (!body.feature || !featureStatuses.includes(body.status ?? "待設定")) {
@@ -28,6 +29,7 @@ export async function PATCH(request: NextRequest) {
       status: body.status ?? "待設定",
     });
 
+    await saveAppStore();
     return NextResponse.json({ data, message: "模型用途設定已更新。" });
   } catch (error) {
     return NextResponse.json(

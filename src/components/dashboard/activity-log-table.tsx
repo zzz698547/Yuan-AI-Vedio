@@ -8,8 +8,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { activityLogs } from "@/data/mock-admin";
+import type { ActivityLogItem } from "@/types/admin-dashboard";
 
-export function ActivityLogTable() {
+type ActivityLogTableProps = {
+  logs?: readonly ActivityLogItem[];
+};
+
+export function ActivityLogTable({ logs = activityLogs }: ActivityLogTableProps) {
   return (
     <section className="dashboard-card">
       <h2 className="mb-5 text-lg font-bold tracking-tight text-foreground">
@@ -28,7 +33,17 @@ export function ActivityLogTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {activityLogs.map((log) => (
+            {logs.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="h-28 text-center text-sm text-muted-foreground"
+                >
+                  目前沒有系統活動紀錄
+                </TableCell>
+              </TableRow>
+            ) : null}
+            {logs.map((log) => (
               <TableRow key={`${log.time}-${log.target}`}>
                 <TableCell className="text-muted-foreground">{log.time}</TableCell>
                 <TableCell className="font-semibold text-foreground">

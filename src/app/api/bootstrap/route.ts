@@ -1,16 +1,22 @@
 import { NextResponse } from "next/server";
 
-import { getDashboardSeedData, initializeAppStore } from "@/lib/server-store";
+import { initializePersistentAppStore } from "@/lib/server-store";
 
 export async function POST() {
-  const store = initializeAppStore();
+  const store = await initializePersistentAppStore();
 
   return NextResponse.json({
     data: {
       initializedAt: store.initializedAt,
       tenants: store.tenants,
-      dashboards: getDashboardSeedData(),
+      tenantAutomation: store.tenantAutomation,
+      tenantNotifications: store.tenantNotifications,
+      integrations: {
+        socialAccounts: store.integrations.socialAccounts,
+        schedules: store.integrations.schedules,
+        mediaTasks: store.integrations.mediaTasks,
+      },
     },
-    message: "全站資料已初始化為空狀態。",
+    message: "全站資料已清空並初始化為空狀態。",
   });
 }

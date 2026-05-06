@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { initializeAppStore } from "@/lib/server-store";
+import { initializePersistentAppStore } from "@/lib/server-store";
 
 export async function POST() {
-  const store = initializeAppStore();
+  const store = await initializePersistentAppStore();
   return NextResponse.json({
     data: store.tenants,
-    message: "已初始化空租戶資料。",
+    message: "已清空並初始化全站資料。",
   });
 }

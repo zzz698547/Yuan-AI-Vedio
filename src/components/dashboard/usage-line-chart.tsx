@@ -13,6 +13,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { usageChartData } from "@/data/mock-admin";
+import type { UsageChartPoint } from "@/types/admin-dashboard";
 
 type ChartTooltipPayload = {
   color?: string;
@@ -58,7 +59,11 @@ function UsageTooltip({ active, payload, label }: ChartTooltipProps) {
   );
 }
 
-export function UsageLineChart() {
+type UsageLineChartProps = {
+  data?: readonly UsageChartPoint[];
+};
+
+export function UsageLineChart({ data = usageChartData }: UsageLineChartProps) {
   return (
     <section className="dashboard-card overflow-hidden">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -82,7 +87,7 @@ export function UsageLineChart() {
           initialDimension={{ width: 640, height: 260 }}
         >
           <LineChart
-            data={usageChartData}
+            data={data}
             margin={{ top: 8, right: 12, bottom: 0, left: -12 }}
           >
             <CartesianGrid stroke="#E5EAF3" strokeDasharray="4 4" vertical={false} />

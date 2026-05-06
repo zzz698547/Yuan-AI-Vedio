@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAppStore } from "@/lib/server-store";
+import { getAppStore, loadAppStore, saveAppStore } from "@/lib/server-store";
 import type { TenantPlan, TenantRecord } from "@/types/tenant-management";
 
 type CreateTenantRequest = {
@@ -17,11 +17,13 @@ function isTenantPlan(value: unknown): value is TenantPlan {
 }
 
 export async function GET() {
+  await loadAppStore();
   const store = getAppStore();
   return NextResponse.json({ data: store.tenants });
 }
 
 export async function POST(request: NextRequest) {
+  await loadAppStore();
   const store = getAppStore();
   const body = (await request.json()) as CreateTenantRequest;
 
@@ -68,11 +70,14 @@ export async function POST(request: NextRequest) {
   };
 
   store.tenants = [tenant, ...store.tenants];
+  await saveAppStore();
   return NextResponse.json({ data: tenant, message: "租戶已建立。" }, { status: 201 });
 }
 
 export async function DELETE() {
+  await loadAppStore();
   const store = getAppStore();
   store.tenants = [];
+  await saveAppStore();
   return NextResponse.json({ data: store.tenants, message: "已刪除全部租戶。" });
 }

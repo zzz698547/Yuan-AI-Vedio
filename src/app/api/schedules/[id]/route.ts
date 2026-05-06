@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getIntegrationState } from "@/lib/server-store";
+import { getIntegrationState, loadAppStore, saveAppStore } from "@/lib/server-store";
 import {
   deletePublishingScheduleRecord,
   updatePublishingScheduleRecord,
@@ -18,6 +18,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await loadAppStore();
     const body = (await request.json()) as ScheduleActionRequest;
 
     if (!isScheduleAction(body.action)) {
@@ -31,6 +32,7 @@ export async function PATCH(
       body.action
     );
 
+    await saveAppStore();
     return NextResponse.json({
       data: schedule,
       message: getActionMessage(body.action),
@@ -48,9 +50,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await loadAppStore();
     const { id } = await params;
     const data = deletePublishingScheduleRecord(getIntegrationState(), id);
 
+    await saveAppStore();
     return NextResponse.json({
       data,
       message: "排程已刪除。",

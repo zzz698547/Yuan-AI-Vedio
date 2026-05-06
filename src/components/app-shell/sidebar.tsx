@@ -86,7 +86,7 @@ export function Sidebar({ mode, className }: SidebarProps) {
           </div>
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-[15px] font-bold leading-5 text-foreground">
-              AI Video Platform
+              Veltrix AI
             </span>
             <span className="text-xs font-medium text-muted-foreground">
               SaaS Dashboard
