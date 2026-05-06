@@ -1,0 +1,66 @@
+import type { TenantDashboardData } from "@/types/tenant-dashboard";
+
+export const initialTenantDashboardData: TenantDashboardData = {
+  stats: [
+    {
+      title: "本月生成影片",
+      value: "0",
+      change: "尚未產出",
+      changeType: "increase",
+      color: "blue",
+      iconName: "Film",
+    },
+    {
+      title: "已排程貼文",
+      value: "0",
+      change: "尚未排程",
+      changeType: "increase",
+      color: "orange",
+      iconName: "CalendarClock",
+    },
+    {
+      title: "已發布貼文",
+      value: "0",
+      change: "尚未發布",
+      changeType: "increase",
+      color: "green",
+      iconName: "CheckCircle2",
+    },
+    {
+      title: "平均互動率",
+      value: "0%",
+      change: "等待資料",
+      changeType: "increase",
+      color: "purple",
+      iconName: "BarChart3",
+    },
+    {
+      title: "剩餘額度",
+      value: "100%",
+      change: "全新額度",
+      changeType: "increase",
+      color: "red",
+      iconName: "Clock3",
+    },
+  ],
+  videoTrend: [],
+  platformPerformance: [],
+  tasks: [],
+  quickActions: [
+    { title: "分析參考影片", iconName: "Play" },
+    { title: "上傳我的影片", iconName: "UploadCloud" },
+    { title: "AI 自動剪輯", iconName: "Clapperboard" },
+    { title: "產生熱門短片", iconName: "Sparkles" },
+    { title: "排程發文", iconName: "CalendarClock" },
+    { title: "查看成效", iconName: "BarChart3" },
+  ],
+  recentProjects: [],
+  upcomingPosts: [],
+  aiSuggestions: [],
+  socialStatus: [
+    { platform: "Instagram", connected: false, count: 0 },
+    { platform: "TikTok", connected: false, count: 0 },
+    { platform: "YouTube", connected: false, count: 0 },
+    { platform: "Facebook", connected: false, count: 0 },
+  ],
+};
