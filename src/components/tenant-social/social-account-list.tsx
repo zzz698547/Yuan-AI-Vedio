@@ -13,14 +13,18 @@ type SocialAccountListProps = {
   accounts: SocialAccountBinding[];
   platforms: SocialPlatformBinding[];
   isDeleting: boolean;
+  deletingAccountId: string;
   onDeleteAll: () => void;
+  onDeleteAccount: (accountId: string) => void;
 };
 
 export function SocialAccountList({
   accounts,
   platforms,
   isDeleting,
+  deletingAccountId,
   onDeleteAll,
+  onDeleteAccount,
 }: SocialAccountListProps) {
   return (
     <section className="dashboard-card">
@@ -54,7 +58,7 @@ export function SocialAccountList({
           accounts.map((account) => (
             <div
               key={account.id}
-              className="grid gap-3 rounded-2xl border border-border bg-white p-4 md:grid-cols-[1fr_1fr_1fr_auto]"
+              className="grid min-w-0 gap-3 rounded-2xl border border-border bg-white p-4 md:grid-cols-[1fr_1fr_1fr_auto]"
             >
               <div>
                 <p className="text-xs font-semibold text-muted-foreground">平台</p>
@@ -64,7 +68,7 @@ export function SocialAccountList({
               </div>
               <div>
                 <p className="text-xs font-semibold text-muted-foreground">帳號</p>
-                <p className="mt-1 font-bold text-foreground">
+                <p className="mt-1 break-words font-bold text-foreground">
                   {account.accountName}
                 </p>
               </div>
@@ -74,10 +78,21 @@ export function SocialAccountList({
                   {account.tokenMasked ?? "****"}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline">{account.bindingMethod ?? "Manual"}</Badge>
                 <Badge variant="outline">{account.tokenStatus}</Badge>
                 <Badge variant="outline">{account.permissionStatus}</Badge>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  disabled={deletingAccountId === account.id}
+                  onClick={() => onDeleteAccount(account.id)}
+                  className="rounded-xl"
+                >
+                  <Trash2 data-icon="inline-start" />
+                  {deletingAccountId === account.id ? "刪除中" : "刪除"}
+                </Button>
               </div>
             </div>
           ))

@@ -1,17 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { createSchedule, isSocialPlatformId } from "@/lib/integration-service";
+import { isSocialPlatformId } from "@/lib/integration-service";
 import { getIntegrationState } from "@/lib/server-store";
+import {
+  createPublishingScheduleRecord,
+  getPublishingSchedulePayload,
+} from "@/lib/social-schedules";
 
 type ScheduleRequest = {
   tenantId?: string;
   title?: string;
   platform?: unknown;
+  accountId?: string;
+  caption?: string;
+  mediaUrl?: string;
   publishAt?: string;
 };
 
 export async function GET() {
-  return NextResponse.json({ data: getIntegrationState().schedules });
+  return NextResponse.json({
+    data: getPublishingSchedulePayload(getIntegrationState()),
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -23,22 +32,15 @@ export async function POST(request: NextRequest) {
     }
 
     const integrations = getIntegrationState();
-    const platform = integrations.socialPlatforms.find((item) => item.id === body.platform);
-
-    if (!platform || platform.status !== "已驗證") {
-      return NextResponse.json(
-        { error: "請先完成社群手動綁定後再建立真實排程。" },
-        { status: 400 }
-      );
-    }
-
-    const schedule = createSchedule({
+    const schedule = createPublishingScheduleRecord(integrations, {
       tenantId: body.tenantId ?? "",
       title: body.title ?? "",
       platform: body.platform,
+      accountId: body.accountId,
+      caption: body.caption,
+      mediaUrl: body.mediaUrl,
       publishAt: body.publishAt ?? "",
     });
-    integrations.schedules = [schedule, ...integrations.schedules];
 
     return NextResponse.json({ data: schedule, message: "排程已建立。" }, { status: 201 });
   } catch (error) {

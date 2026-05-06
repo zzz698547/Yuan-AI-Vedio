@@ -11,6 +11,11 @@ import type {
   SocialPlatformBinding,
   SocialPlatformId,
 } from "@/types/integrations";
+import type {
+  PublishingSchedulePayload,
+  ScheduleAction,
+  SocialAnalyticsPayload,
+} from "@/types/social-operations";
 
 export type AiModelsPayload = {
   providers: AiProviderBinding[];
@@ -161,10 +166,32 @@ export async function deleteAllSocialAccounts() {
   >;
 }
 
+export async function deleteSocialAccount(accountId: string) {
+  const response = await fetch(
+    `/api/integrations/social/accounts/${encodeURIComponent(accountId)}`,
+    {
+      method: "DELETE",
+    }
+  );
+  return parseApiResponse<SocialPayload>(response) as Promise<
+    ApiResponse<SocialPayload>
+  >;
+}
+
+export async function fetchPublishingSchedules() {
+  const response = await fetch("/api/schedules");
+  return parseApiResponse<PublishingSchedulePayload>(response) as Promise<
+    ApiResponse<PublishingSchedulePayload>
+  >;
+}
+
 export async function createPublishingSchedule(payload: {
   tenantId: string;
   title: string;
   platform: SocialPlatformId;
+  accountId?: string;
+  caption?: string;
+  mediaUrl?: string;
   publishAt: string;
 }) {
   const response = await fetch("/api/schedules", {
@@ -176,6 +203,38 @@ export async function createPublishingSchedule(payload: {
   });
   return parseApiResponse<PublishingSchedule>(response) as Promise<
     ApiResponse<PublishingSchedule>
+  >;
+}
+
+export async function updatePublishingSchedule(
+  scheduleId: string,
+  action: ScheduleAction
+) {
+  const response = await fetch(`/api/schedules/${encodeURIComponent(scheduleId)}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ action }),
+  });
+  return parseApiResponse<PublishingSchedule>(response) as Promise<
+    ApiResponse<PublishingSchedule>
+  >;
+}
+
+export async function deletePublishingSchedule(scheduleId: string) {
+  const response = await fetch(`/api/schedules/${encodeURIComponent(scheduleId)}`, {
+    method: "DELETE",
+  });
+  return parseApiResponse<PublishingSchedulePayload>(response) as Promise<
+    ApiResponse<PublishingSchedulePayload>
+  >;
+}
+
+export async function fetchSocialAnalytics() {
+  const response = await fetch("/api/tenant/analytics");
+  return parseApiResponse<SocialAnalyticsPayload>(response) as Promise<
+    ApiResponse<SocialAnalyticsPayload>
   >;
 }
 

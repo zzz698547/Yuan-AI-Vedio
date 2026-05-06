@@ -22,14 +22,27 @@ export async function POST(request: NextRequest) {
     }
 
     const integrations = getIntegrationState();
-    const account = createManualSocialBinding({
+    const platformConfig = integrations.socialPlatforms.find(
+      (platform) => platform.id === body.platform
+    );
+
+    if (!platformConfig) {
+      return NextResponse.json({ error: "找不到社群平台設定。" }, { status: 404 });
+    }
+
+    const { account, tokenRecord } = createManualSocialBinding({
       platform: body.platform,
       accountName: body.accountName ?? "",
       tenantName: body.tenantName ?? "",
       accessToken: body.accessToken ?? "",
+      scopes: platformConfig.scopes,
     });
 
     integrations.socialAccounts = [account, ...integrations.socialAccounts];
+    integrations.socialTokens = [
+      tokenRecord,
+      ...integrations.socialTokens.filter((token) => token.accountId !== account.id),
+    ];
     integrations.socialPlatforms = integrations.socialPlatforms.map((platform) =>
       platform.id === body.platform
         ? {

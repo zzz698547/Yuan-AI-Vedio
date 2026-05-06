@@ -124,6 +124,7 @@ export function createManualSocialBinding(payload: {
   accountName: string;
   tenantName: string;
   accessToken: string;
+  scopes?: string[];
 }) {
   const accountName = payload.accountName.trim();
   const tenantName = payload.tenantName.trim() || "目前租戶";
@@ -137,8 +138,10 @@ export function createManualSocialBinding(payload: {
     throw new Error("Access Token 至少需要 8 個字元。");
   }
 
-  return {
-    id: `social-${payload.platform}-${Date.now()}`,
+  const now = new Date().toISOString();
+  const accountId = `social-${payload.platform}-${Date.now()}`;
+  const account = {
+    id: accountId,
     platform: payload.platform,
     accountName,
     tenantName,
@@ -146,18 +149,33 @@ export function createManualSocialBinding(payload: {
     bindingMethod: "Manual" as const,
     tokenStatus: "正常" as const,
     permissionStatus: payload.platform === "youtube" ? ("可上傳" as const) : ("可發文" as const),
-    syncedAt: new Date().toISOString(),
+    grantedScopes: payload.scopes ?? [],
+    syncedAt: now,
   };
+  const tokenRecord = {
+    accountId,
+    platform: payload.platform,
+    accessToken,
+    scopes: payload.scopes ?? [],
+    tokenType: "manual",
+    createdAt: now,
+  };
+
+  return { account, tokenRecord };
 }
 
 export function createSchedule(payload: {
   tenantId: string;
   title: string;
   platform: SocialPlatformId;
+  accountId?: string;
+  caption?: string;
+  mediaUrl?: string;
   publishAt: string;
 }) {
   const title = payload.title.trim();
   const publishDate = new Date(payload.publishAt);
+  const now = new Date().toISOString();
 
   if (!payload.tenantId.trim() || !title || Number.isNaN(publishDate.getTime())) {
     throw new Error("租戶、標題與發布時間皆為必填。");
@@ -168,9 +186,13 @@ export function createSchedule(payload: {
     tenantId: payload.tenantId.trim(),
     title,
     platform: payload.platform,
+    accountId: payload.accountId?.trim() || undefined,
+    caption: payload.caption?.trim() || undefined,
+    mediaUrl: payload.mediaUrl?.trim() || undefined,
     publishAt: publishDate.toISOString(),
     status: "已排程" as const,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
+    updatedAt: now,
   };
 }
 

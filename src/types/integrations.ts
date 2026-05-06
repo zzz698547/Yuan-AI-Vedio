@@ -80,9 +80,15 @@ export type PublishingSchedule = {
   tenantId: string;
   title: string;
   platform: SocialPlatformId;
+  accountId?: string;
+  caption?: string;
+  mediaUrl?: string;
   publishAt: string;
   status: ScheduleStatus;
   createdAt: string;
+  updatedAt?: string;
+  publishedAt?: string;
+  errorMessage?: string;
 };
 
 export type MediaTaskType =

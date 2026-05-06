@@ -5,11 +5,15 @@ import { useEffect, useState } from "react";
 
 import { ManualSocialBindForm } from "@/components/tenant-social/manual-social-bind-form";
 import { OfficialSocialOAuthPanel } from "@/components/tenant-social/official-social-oauth-panel";
+import { SocialBindingOverview } from "@/components/tenant-social/social-binding-overview";
 import { SocialAccountList } from "@/components/tenant-social/social-account-list";
+import { SocialStatusMessage } from "@/components/tenant-social/social-status-message";
 import {
   deleteAllSocialAccounts,
+  deleteSocialAccount,
   fetchSocialIntegrations,
   manualBindSocialAccount,
+  syncSocialPlatform,
   startTenantSocialOAuth,
 } from "@/lib/integrations-api";
 import { getMockSession } from "@/lib/mock-auth";
@@ -32,6 +36,10 @@ export function ManualSocialBindClient() {
   const [error, setError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingAccountId, setDeletingAccountId] = useState("");
+  const [syncingPlatform, setSyncingPlatform] = useState<SocialPlatformId | null>(
+    null
+  );
   const [pendingPlatform, setPendingPlatform] = useState<SocialPlatformId | null>(
     null
   );
@@ -158,6 +166,42 @@ export function ManualSocialBindClient() {
     }
   }
 
+  async function handleSync(platform: SocialPlatformId) {
+    setSyncingPlatform(platform);
+    resetMessage();
+
+    try {
+      const result = await syncSocialPlatform(platform);
+      applySocialPayload(result.data.platforms, result.data.accounts);
+      setNotice(result.message ?? "社群平台已同步。");
+    } catch (syncError) {
+      setError(syncError instanceof Error ? syncError.message : "同步失敗。");
+    } finally {
+      setSyncingPlatform(null);
+    }
+  }
+
+  async function handleDeleteAccount(accountId: string) {
+    if (!window.confirm("確定要刪除此社群帳號嗎？相關排程會移回草稿。")) {
+      return;
+    }
+
+    setDeletingAccountId(accountId);
+    resetMessage();
+
+    try {
+      const result = await deleteSocialAccount(accountId);
+      applySocialPayload(result.data.platforms, result.data.accounts);
+      setNotice(result.message ?? "社群帳號已刪除。");
+    } catch (deleteError) {
+      setError(
+        deleteError instanceof Error ? deleteError.message : "刪除帳號失敗。"
+      );
+    } finally {
+      setDeletingAccountId("");
+    }
+  }
+
   async function handleDeleteAll() {
     if (!window.confirm("確定要刪除所有已綁定社群帳號嗎？")) {
       return;
@@ -201,8 +245,10 @@ export function ManualSocialBindClient() {
         </p>
       </section>
 
-      {notice ? <StatusMessage tone="success" message={notice} /> : null}
-      {error ? <StatusMessage tone="danger" message={error} /> : null}
+      <SocialBindingOverview accounts={accounts} platforms={platforms} />
+
+      {notice ? <SocialStatusMessage tone="success" message={notice} /> : null}
+      {error ? <SocialStatusMessage tone="danger" message={error} /> : null}
 
       <section className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
         <ManualSocialBindForm
@@ -213,7 +259,9 @@ export function ManualSocialBindClient() {
         <OfficialSocialOAuthPanel
           platforms={platforms}
           pendingPlatform={pendingPlatform}
+          syncingPlatform={syncingPlatform}
           onAuthorize={handleOfficialAuthorize}
+          onSync={handleSync}
         />
       </section>
 
@@ -221,27 +269,10 @@ export function ManualSocialBindClient() {
         accounts={accounts}
         platforms={platforms}
         isDeleting={isDeleting}
+        deletingAccountId={deletingAccountId}
         onDeleteAll={handleDeleteAll}
+        onDeleteAccount={handleDeleteAccount}
       />
-    </div>
-  );
-}
-
-function StatusMessage({
-  tone,
-  message,
-}: {
-  tone: "success" | "danger";
-  message: string;
-}) {
-  const toneClass =
-    tone === "success"
-      ? "border-green-100 bg-green-50 text-success"
-      : "border-red-100 bg-red-50 text-danger";
-
-  return (
-    <div className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${toneClass}`}>
-      {message}
     </div>
   );
 }

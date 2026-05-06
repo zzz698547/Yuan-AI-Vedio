@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, ShieldCheck } from "lucide-react";
+import { ExternalLink, RefreshCw, ShieldCheck } from "lucide-react";
 
 import { StatusBadge } from "@/components/integrations/status-badge";
 import { FacebookLoginStatusCard } from "@/components/tenant-social/facebook-login-status-card";
@@ -13,13 +13,17 @@ import type {
 type OfficialSocialOAuthPanelProps = {
   platforms: SocialPlatformBinding[];
   pendingPlatform: SocialPlatformId | null;
+  syncingPlatform: SocialPlatformId | null;
   onAuthorize: (platform: SocialPlatformId) => void;
+  onSync: (platform: SocialPlatformId) => void;
 };
 
 export function OfficialSocialOAuthPanel({
   platforms,
   pendingPlatform,
+  syncingPlatform,
   onAuthorize,
+  onSync,
 }: OfficialSocialOAuthPanelProps) {
   const facebookPlatform = platforms.find((platform) => platform.id === "facebook");
 
@@ -51,28 +55,40 @@ export function OfficialSocialOAuthPanel({
           platforms.map((platform) => (
             <article
               key={platform.id}
-              className="rounded-2xl border border-border bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_14px_32px_rgba(15,23,42,0.08)]"
+              className="min-w-0 rounded-2xl border border-border bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_14px_32px_rgba(15,23,42,0.08)]"
             >
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center justify-between gap-3">
                 <p className="font-bold text-foreground">{platform.name}</p>
                 <StatusBadge status={platform.status} />
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
                 已綁定 {platform.connectedCount} 個帳號
               </p>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+              <p className="mt-2 break-words text-xs leading-5 text-muted-foreground">
                 {platform.lastMessage ?? platform.scopes.join(", ")}
               </p>
-              <Button
-                type="button"
-                variant={platform.status === "已驗證" ? "outline" : "default"}
-                disabled={pendingPlatform === platform.id}
-                onClick={() => onAuthorize(platform.id)}
-                className="mt-4 h-10 w-full rounded-xl"
-              >
-                <ExternalLink data-icon="inline-start" />
-                {pendingPlatform === platform.id ? "開啟授權中..." : "正式授權"}
-              </Button>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <Button
+                  type="button"
+                  variant={platform.status === "已驗證" ? "outline" : "default"}
+                  disabled={pendingPlatform === platform.id}
+                  onClick={() => onAuthorize(platform.id)}
+                  className="h-10 rounded-xl"
+                >
+                  <ExternalLink data-icon="inline-start" />
+                  {pendingPlatform === platform.id ? "授權中" : "正式授權"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={syncingPlatform === platform.id}
+                  onClick={() => onSync(platform.id)}
+                  className="h-10 rounded-xl"
+                >
+                  <RefreshCw data-icon="inline-start" />
+                  {syncingPlatform === platform.id ? "同步中" : "同步"}
+                </Button>
+              </div>
             </article>
           ))
         )}
