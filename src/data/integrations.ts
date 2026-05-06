@@ -4,6 +4,7 @@ import type {
   SocialAccountBinding,
   SocialPlatformBinding,
 } from "@/types/integrations";
+import { tenantAiModelFeatures } from "@/data/tenant-ai-models";
 
 export const initialAiProviders: AiProviderBinding[] = [
   {
@@ -32,36 +33,8 @@ export const initialAiProviders: AiProviderBinding[] = [
   },
 ];
 
-export const initialModelFeatures: ModelFeatureBinding[] = [
-  {
-    feature: "腳本生成",
-    currentModel: "OpenAI GPT-5.2",
-    fallbackModel: "Gemini 2.0 Pro",
-    estimatedCost: "$0.018",
-    status: "待設定",
-  },
-  {
-    feature: "參考影片分析",
-    currentModel: "OpenAI Vision",
-    fallbackModel: "Gemini Vision",
-    estimatedCost: "$0.026",
-    status: "待設定",
-  },
-  {
-    feature: "字幕生成",
-    currentModel: "OpenAI Transcribe",
-    fallbackModel: "Local ASR",
-    estimatedCost: "$0.009",
-    status: "待設定",
-  },
-  {
-    feature: "影片生成",
-    currentModel: "自訂 Provider",
-    fallbackModel: "Gemini",
-    estimatedCost: "$0.180",
-    status: "待設定",
-  },
-];
+export const initialModelFeatures: ModelFeatureBinding[] =
+  tenantAiModelFeatures.map((feature) => ({ ...feature }));
 
 export const initialSocialPlatforms: SocialPlatformBinding[] = [
   {

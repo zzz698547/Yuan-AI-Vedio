@@ -180,9 +180,9 @@ export const tenantNavItems: NavGroup[] = [
         iconName: "Palette",
       },
       {
-        title: "API 模型設定",
+        title: "AI 模型綁定",
         href: "/tenant/settings",
-        iconName: "SlidersHorizontal",
+        iconName: "BrainCircuit",
       },
     ],
   },

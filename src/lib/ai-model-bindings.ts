@@ -123,17 +123,22 @@ export function updateModelFeature(
     throw new Error("功能、模型與成本皆為必填。");
   }
 
-  integrations.modelFeatures = integrations.modelFeatures.map((feature) =>
-    feature.feature === payload.feature
-      ? {
-          feature: payload.feature,
-          currentModel,
-          fallbackModel,
-          estimatedCost,
-          status: payload.status,
-        }
-      : feature
+  const nextFeature = {
+    feature: payload.feature,
+    currentModel,
+    fallbackModel,
+    estimatedCost,
+    status: payload.status,
+  };
+  const existingFeature = integrations.modelFeatures.some(
+    (feature) => feature.feature === payload.feature
   );
+
+  integrations.modelFeatures = existingFeature
+    ? integrations.modelFeatures.map((feature) =>
+        feature.feature === payload.feature ? nextFeature : feature
+      )
+    : [...integrations.modelFeatures, nextFeature];
 
   return getAiModelPayload(integrations);
 }
