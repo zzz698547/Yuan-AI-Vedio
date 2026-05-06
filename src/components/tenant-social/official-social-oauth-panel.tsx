@@ -3,6 +3,7 @@
 import { ExternalLink, ShieldCheck } from "lucide-react";
 
 import { StatusBadge } from "@/components/integrations/status-badge";
+import { FacebookLoginStatusCard } from "@/components/tenant-social/facebook-login-status-card";
 import { Button } from "@/components/ui/button";
 import type {
   SocialPlatformBinding,
@@ -20,6 +21,8 @@ export function OfficialSocialOAuthPanel({
   pendingPlatform,
   onAuthorize,
 }: OfficialSocialOAuthPanelProps) {
+  const facebookPlatform = platforms.find((platform) => platform.id === "facebook");
+
   return (
     <section className="dashboard-card">
       <div className="flex items-center gap-3">
@@ -33,6 +36,8 @@ export function OfficialSocialOAuthPanel({
           </p>
         </div>
       </div>
+
+      <FacebookLoginStatusCard platform={facebookPlatform} />
 
       <div className="mt-5 grid gap-3 md:grid-cols-2">
         {platforms.length === 0 ? (
