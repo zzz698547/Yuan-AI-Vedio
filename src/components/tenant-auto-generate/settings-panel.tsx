@@ -242,9 +242,10 @@ function TagEditor({
         className="mt-4 flex gap-2"
         onSubmit={(event) => {
           event.preventDefault();
-          const formData = new FormData(event.currentTarget);
+          const form = event.currentTarget;
+          const formData = new FormData(form);
           onAdd(String(formData.get("tag") ?? ""));
-          event.currentTarget.reset();
+          form.reset();
         }}
       >
         <Input name="tag" placeholder={`新增${title}`} className="h-10 rounded-xl bg-white" />

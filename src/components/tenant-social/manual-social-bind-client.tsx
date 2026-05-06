@@ -110,7 +110,8 @@ export function ManualSocialBindClient() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
 
     setIsSubmitting(true);
     resetMessage();
@@ -124,7 +125,7 @@ export function ManualSocialBindClient() {
       });
       applySocialPayload(result.data.platforms, result.data.accounts);
       setNotice(result.message ?? "社群帳號已手動綁定。");
-      event.currentTarget.reset();
+      form.reset();
     } catch (bindError) {
       setError(bindError instanceof Error ? bindError.message : "手動綁定失敗。");
     } finally {

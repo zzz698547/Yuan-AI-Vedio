@@ -69,7 +69,8 @@ export function TenantNotificationsClient() {
 
   async function handleBind(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
 
     setIsBinding(true);
     resetMessage();
@@ -82,7 +83,7 @@ export function TenantNotificationsClient() {
       });
       applyPayload(result.data);
       setNotice(result.message ?? "Telegram 已手動綁定。");
-      event.currentTarget.reset();
+      form.reset();
     } catch (bindError) {
       setError(bindError instanceof Error ? bindError.message : "Telegram 綁定失敗。");
     } finally {
