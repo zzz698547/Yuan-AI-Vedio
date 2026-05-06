@@ -80,7 +80,7 @@ export function FacebookLoginSummary({
           className="h-10 rounded-xl"
         >
           <LogIn data-icon="inline-start" />
-          使用 Facebook 登入
+          一鍵登入並綁定
         </Button>
       </div>
     </div>

@@ -11,6 +11,7 @@ type ManualBindRequest = {
   accountName?: string;
   tenantName?: string;
   accessToken?: string;
+  scopes?: unknown;
 };
 
 export async function POST(request: NextRequest) {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
       accountName: body.accountName ?? "",
       tenantName: body.tenantName ?? "",
       accessToken: body.accessToken ?? "",
-      scopes: platformConfig.scopes,
+      scopes: readScopes(body.scopes, platformConfig.scopes),
     });
 
     integrations.socialAccounts = [account, ...integrations.socialAccounts];
@@ -75,4 +76,13 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+}
+
+function readScopes(value: unknown, fallback: string[]) {
+  if (!Array.isArray(value)) {
+    return fallback;
+  }
+
+  const scopes = value.filter((scope): scope is string => typeof scope === "string");
+  return scopes.length > 0 ? scopes : fallback;
 }

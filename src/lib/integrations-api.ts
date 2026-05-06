@@ -144,6 +144,7 @@ export async function manualBindSocialAccount(payload: {
   accountName: string;
   tenantName: string;
   accessToken: string;
+  scopes?: string[];
 }) {
   const response = await fetch("/api/integrations/social/manual-bind", {
     method: "POST",

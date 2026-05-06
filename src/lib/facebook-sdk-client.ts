@@ -3,12 +3,8 @@ import type {
   FacebookProfile,
   FacebookProfileResponse,
 } from "@/types/facebook-sdk";
-import type { SocialPlatformBinding } from "@/types/integrations";
 
-export function getRequestedScopes(
-  features: FacebookLoginFeature[],
-  platform?: SocialPlatformBinding
-) {
+export function getRequestedScopes(features: FacebookLoginFeature[]) {
   const scopes = new Set<string>();
 
   for (const feature of features) {
@@ -17,14 +13,9 @@ export function getRequestedScopes(
     }
   }
 
-  if (scopes.size === 0 && platform?.scopes.length) {
-    for (const scope of platform.scopes) {
-      scopes.add(scope);
-    }
-  }
-
   if (scopes.size === 0) {
     scopes.add("public_profile");
+    scopes.add("email");
   }
 
   return Array.from(scopes).join(",");
@@ -52,6 +43,28 @@ export function loadFacebookProfile(
       setProfile(response);
     }
   );
+}
+
+export function fetchFacebookProfile() {
+  return new Promise<FacebookProfile>((resolve, reject) => {
+    if (!canUseFacebookLoginInCurrentOrigin() || !window.FB) {
+      reject(new Error("Facebook SDK 尚未準備完成。"));
+      return;
+    }
+
+    window.FB.api(
+      "/me",
+      { fields: "id,name,picture.width(160).height(160)" },
+      (response: FacebookProfileResponse) => {
+        if (response.error) {
+          reject(new Error(response.error.message));
+          return;
+        }
+
+        resolve(response);
+      }
+    );
+  });
 }
 
 export function canUseFacebookLoginInCurrentOrigin() {

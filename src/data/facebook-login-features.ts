@@ -11,18 +11,21 @@ export const facebookLoginFeatures: FacebookLoginFeature[] = [
     id: "page-list",
     label: "讀取粉專列表",
     description: "讓系統偵測可管理的粉絲專頁，作為後續綁定目標。",
+    requiresAppReview: true,
     scopes: ["pages_show_list"],
   },
   {
     id: "publishing",
     label: "發布貼文與短影音",
     description: "允許後台排程發布貼文、Reels 或短影音內容。",
+    requiresAppReview: true,
     scopes: ["pages_manage_posts", "instagram_content_publish"],
   },
   {
     id: "analytics",
     label: "讀取互動成效",
     description: "同步貼文互動、觸及與成效數據，提供營運分析使用。",
+    requiresAppReview: true,
     scopes: ["pages_read_engagement", "instagram_basic"],
   },
 ];

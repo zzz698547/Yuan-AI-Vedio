@@ -25,8 +25,6 @@ export function OfficialSocialOAuthPanel({
   onAuthorize,
   onSync,
 }: OfficialSocialOAuthPanelProps) {
-  const facebookPlatform = platforms.find((platform) => platform.id === "facebook");
-
   return (
     <section className="dashboard-card">
       <div className="flex items-center gap-3">
@@ -41,7 +39,7 @@ export function OfficialSocialOAuthPanel({
         </div>
       </div>
 
-      <FacebookLoginStatusCard platform={facebookPlatform} />
+      <FacebookLoginStatusCard />
 
       <div className="mt-5 grid gap-3 md:grid-cols-2">
         {platforms.length === 0 ? (
@@ -65,7 +63,7 @@ export function OfficialSocialOAuthPanel({
                 已綁定 {platform.connectedCount} 個帳號
               </p>
               <p className="mt-2 break-words text-xs leading-5 text-muted-foreground">
-                {platform.lastMessage ?? platform.scopes.join(", ")}
+                {platform.lastMessage ?? getScopeSummary(platform)}
               </p>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 <Button
@@ -95,4 +93,12 @@ export function OfficialSocialOAuthPanel({
       </div>
     </section>
   );
+}
+
+function getScopeSummary(platform: SocialPlatformBinding) {
+  if (platform.id === "facebook" || platform.id === "instagram") {
+    return "目前使用基本登入權限 public_profile, email；粉專發布與洞察權限需 Meta App Review 通過後開啟。";
+  }
+
+  return platform.scopes.join(", ");
 }

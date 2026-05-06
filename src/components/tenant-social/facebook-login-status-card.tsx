@@ -9,10 +9,13 @@ import { FacebookOfficialLoginButton } from "@/components/tenant-social/facebook
 import { facebookLoginFeatures } from "@/data/facebook-login-features";
 import {
   canUseFacebookLoginInCurrentOrigin,
+  fetchFacebookProfile,
   getRequestedScopes,
   loadFacebookProfile,
   parseFacebookLoginButton,
 } from "@/lib/facebook-sdk-client";
+import { manualBindSocialAccount } from "@/lib/integrations-api";
+import { getMockSession } from "@/lib/mock-auth";
 import {
   FACEBOOK_LOGIN_STATUS_EVENT,
   FACEBOOK_SDK_READY_EVENT,
@@ -20,15 +23,8 @@ import {
   type FacebookLoginUiStatus,
   type FacebookProfile,
 } from "@/types/facebook-sdk";
-import type { SocialPlatformBinding } from "@/types/integrations";
 
-type FacebookLoginStatusCardProps = {
-  platform?: SocialPlatformBinding;
-};
-
-export function FacebookLoginStatusCard({
-  platform,
-}: FacebookLoginStatusCardProps) {
+export function FacebookLoginStatusCard() {
   const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
   const canUseFacebookLogin = useSyncExternalStore(
     subscribeToLocationChanges,
@@ -42,15 +38,19 @@ export function FacebookLoginStatusCard({
     useState<FacebookLoginStatusResponse | null>(null);
   const [profile, setProfile] = useState<FacebookProfile | null>(null);
   const [profileError, setProfileError] = useState("");
+  const [bindNotice, setBindNotice] = useState("");
+  const [bindError, setBindError] = useState("");
   const [isChecking, setIsChecking] = useState(false);
+  const advancedScopesEnabled =
+    process.env.NEXT_PUBLIC_FACEBOOK_ADVANCED_SCOPES === "true";
   const [selectedFeatureIds, setSelectedFeatureIds] = useState<string[]>(() =>
-    facebookLoginFeatures.map((feature) => feature.id)
+    ["basic-profile"]
   );
 
   const selectedFeatures = facebookLoginFeatures.filter((feature) =>
     selectedFeatureIds.includes(feature.id)
   );
-  const requestedScopes = getRequestedScopes(selectedFeatures, platform);
+  const requestedScopes = getRequestedScopes(selectedFeatures);
   const selectedFeatureLabels = selectedFeatures.map((feature) => feature.label);
   const displayStatus: FacebookLoginUiStatus = appId
     ? canUseFacebookLogin
@@ -150,14 +150,17 @@ export function FacebookLoginStatusCard({
     }
 
     setIsChecking(true);
+    setBindNotice("");
+    setBindError("");
     window.FB.login(
-      (response) => {
+      async (response) => {
         setLoginResponse(response);
         setStatus(response.status);
         setIsChecking(false);
 
         if (response.status === "connected") {
           loadFacebookProfile(setProfile, setProfileError);
+          await bindFacebookAccount(response);
         }
       },
       {
@@ -168,6 +171,12 @@ export function FacebookLoginStatusCard({
   }
 
   function toggleFeature(featureId: string) {
+    const feature = facebookLoginFeatures.find((item) => item.id === featureId);
+
+    if (feature?.requiresAppReview && !advancedScopesEnabled) {
+      return;
+    }
+
     setSelectedFeatureIds((current) => {
       if (current.includes(featureId)) {
         return current.filter((id) => id !== featureId);
@@ -175,6 +184,33 @@ export function FacebookLoginStatusCard({
 
       return [...current, featureId];
     });
+  }
+
+  async function bindFacebookAccount(response: FacebookLoginStatusResponse) {
+    const accessToken = response.authResponse?.accessToken;
+
+    if (!accessToken) {
+      setBindError("Facebook 未回傳 Access Token，請重新登入。");
+      return;
+    }
+
+    try {
+      const facebookProfile = await fetchFacebookProfile();
+      setProfile(facebookProfile);
+      await manualBindSocialAccount({
+        platform: "facebook",
+        accountName: facebookProfile.name,
+        tenantName: getTenantName(),
+        accessToken,
+        scopes: getGrantedScopes(response, requestedScopes),
+      });
+      setBindNotice("Facebook 帳號已成功一鍵綁定，畫面即將重新整理。");
+      window.setTimeout(() => window.location.reload(), 700);
+    } catch (error) {
+      setBindError(
+        error instanceof Error ? error.message : "Facebook 一鍵綁定失敗。"
+      );
+    }
   }
 
   return (
@@ -190,6 +226,7 @@ export function FacebookLoginStatusCard({
       />
 
       <FacebookFeatureSelector
+        advancedScopesEnabled={advancedScopesEnabled}
         disabled={!appId}
         features={facebookLoginFeatures}
         selectedFeatureIds={selectedFeatureIds}
@@ -206,6 +243,16 @@ export function FacebookLoginStatusCard({
           {profileError}
         </p>
       ) : null}
+      {bindNotice ? (
+        <p className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-success">
+          {bindNotice}
+        </p>
+      ) : null}
+      {bindError ? (
+        <p className="mt-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-danger">
+          {bindError}
+        </p>
+      ) : null}
 
       <FacebookAccountPreview
         profile={profile}
@@ -217,6 +264,19 @@ export function FacebookLoginStatusCard({
 
 function getServerFacebookLoginSupport() {
   return true;
+}
+
+function getGrantedScopes(
+  response: FacebookLoginStatusResponse,
+  requestedScopes: string
+) {
+  const grantedScopes = response.authResponse?.grantedScopes || requestedScopes;
+  return grantedScopes.split(",").map((scope) => scope.trim()).filter(Boolean);
+}
+
+function getTenantName() {
+  const session = getMockSession();
+  return session?.tenantName || session?.userName || "目前租戶";
 }
 
 function subscribeToLocationChanges(onStoreChange: () => void) {

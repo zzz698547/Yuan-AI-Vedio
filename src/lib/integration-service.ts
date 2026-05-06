@@ -148,7 +148,7 @@ export function createManualSocialBinding(payload: {
     tokenMasked: maskSecret(accessToken),
     bindingMethod: "Manual" as const,
     tokenStatus: "正常" as const,
-    permissionStatus: payload.platform === "youtube" ? ("可上傳" as const) : ("可發文" as const),
+    permissionStatus: getPermissionStatus(payload.platform, payload.scopes ?? []),
     grantedScopes: payload.scopes ?? [],
     syncedAt: now,
   };
@@ -162,6 +162,21 @@ export function createManualSocialBinding(payload: {
   };
 
   return { account, tokenRecord };
+}
+
+function getPermissionStatus(platform: SocialPlatformId, scopes: string[]) {
+  if (platform === "youtube") {
+    return scopes.some((scope) => scope.includes("youtube.upload"))
+      ? ("可上傳" as const)
+      : ("待授權" as const);
+  }
+
+  const canPublish = scopes.some((scope) =>
+    ["pages_manage_posts", "instagram_content_publish", "video.publish"].includes(
+      scope
+    )
+  );
+  return canPublish ? ("可發文" as const) : ("待授權" as const);
 }
 
 export function createSchedule(payload: {

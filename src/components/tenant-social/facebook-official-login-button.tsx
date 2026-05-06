@@ -15,7 +15,7 @@ export function FacebookOfficialLoginButton({
     <div className="mt-4 rounded-2xl border border-dashed border-blue-100 bg-blue-50/60 p-4">
       <p className="text-sm font-bold text-foreground">Facebook 官方登入按鈕</p>
       <p className="mt-1 text-xs leading-5 text-muted-foreground">
-        下方按鈕使用 Meta XFBML login button，onlogin 會呼叫 checkLoginState() 並重新取得登入狀態。
+        下方按鈕使用 Meta XFBML login button，預設只送 public_profile 與 email，避免未審核權限造成 Invalid Scopes。
       </p>
       {canUseFacebookLogin ? (
         <div

@@ -12,6 +12,7 @@ export type FacebookLoginUiStatus =
 export type FacebookAuthResponse = {
   accessToken: string;
   expiresIn: number | string;
+  grantedScopes?: string;
   signedRequest: string;
   userID: string;
 };
@@ -31,6 +32,7 @@ export type FacebookLoginFeature = {
   id: string;
   description: string;
   label: string;
+  requiresAppReview?: boolean;
   scopes: string[];
 };
 

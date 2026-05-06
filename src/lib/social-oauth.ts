@@ -85,7 +85,7 @@ export async function exchangeSocialOAuthCode(
     expiresAt: tokenResult.expiresAt,
     grantedScopes: tokenResult.scopes,
     tokenStatus: "正常",
-    permissionStatus: platform.id === "youtube" ? "可上傳" : "可發文",
+    permissionStatus: getOAuthPermissionStatus(platform.id, tokenResult.scopes),
     syncedAt: now,
   };
 
@@ -184,7 +184,7 @@ function buildAuthorizationUrl(
     client_id: clientId,
     redirect_uri: redirectUri,
     response_type: "code",
-    scope: platform.scopes.join(","),
+    scope: getMetaLoginScopes(platform).join(","),
     state,
   });
 }
@@ -215,11 +215,12 @@ async function fetchMetaToken(platform: SocialPlatformBinding, code: string) {
   const accessToken = readRequiredString(token, "access_token");
   const expiresIn = readNumber(token, "expires_in");
   const providerAccountName = await fetchMetaAccountName(platform.id, accessToken);
+  const scopes = getMetaLoginScopes(platform);
 
   return {
     accessToken,
     expiresAt: toExpiresAt(expiresIn),
-    scopes: platform.scopes,
+    scopes,
     tokenType: readOptionalString(token, "token_type"),
     providerAccountName,
   };
@@ -415,6 +416,29 @@ function splitScopes(scope: string, fallback: string[]) {
   return scope.includes(",")
     ? scope.split(",").filter(Boolean)
     : scope.split(" ").filter(Boolean);
+}
+
+function getMetaLoginScopes(platform: SocialPlatformBinding) {
+  if (process.env.META_ADVANCED_SCOPES_ENABLED === "true") {
+    return platform.scopes;
+  }
+
+  return ["public_profile", "email"];
+}
+
+function getOAuthPermissionStatus(platform: SocialPlatformId, scopes: string[]) {
+  if (platform === "youtube") {
+    return scopes.some((scope) => scope.includes("youtube.upload"))
+      ? ("可上傳" as const)
+      : ("待授權" as const);
+  }
+
+  const canPublish = scopes.some((scope) =>
+    ["pages_manage_posts", "instagram_content_publish", "video.publish"].includes(
+      scope
+    )
+  );
+  return canPublish ? ("可發文" as const) : ("待授權" as const);
 }
 
 function toExpiresAt(expiresIn: number | undefined) {
